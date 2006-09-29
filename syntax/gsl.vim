@@ -1,8 +1,8 @@
 " Vim syntax file
 " Language:	gsl templates
 " Maintainer:	Ronald
-" Version: 	0.1
-" Last Change:	2006 Jul 12
+" Version: 	0.2
+" Last Change:	2006 Sep 29
 
 " For version 5.x: Clear all syntax items
 " For version 6.x: Quit when a syntax file was already loaded
@@ -33,19 +33,32 @@ syn region gslMultilineComment start="/\*" end="\*/" contained
 
 syn keyword gslPredefIdent contained script filename outfile line me version date time
 
-syn keyword gslKeyWord contained output append close literal scope endscope define new endnew delete copy move sort load xml save include gsl template endtemplate macro endmacro function endfunction return invoke echo abort
+syn keyword gslKeyWord contained output append close literal scope endscope define new endnew delete copy move sort load xml save include gsl template endtemplate endmacro endfunction return invoke echo abort
+syn match   gslKeyWord contained "\<\(macro\|function\)\>"
 syn keyword gslConditional contained if elsif else endif
-syn keyword gslRepeat contained for endfor while endwhile next last
+syn keyword gslRepeat contained for endfor while endwhile next last as noalias nostack where by
 
 syn match gslBuiltInFunc contained "\<\(math.rand\|math.pi\|dir.cwd\|mail.error\)\>"
 syn match gslBuiltInFunc contained "\<\(count\|index\|item\|total\|name\|alias\|defined\|deleted\|macro\|scope\|conv.number\|conv.string\|conv.chr\|conv.ord\|file.exists\|file.timestamp\|file.error\|file.locate\|file.rename\|file.delete\|file.open\|file.read\|file.write\|file.tell\|file.seek\|file.close\|file.copy\|file.basename\|env.get\|env.set\|string.length\|string.locate\|string.substr\|string.trim\|string.justify\|string.certify\|string.replace\|string.match\|string.prefixed\|string.prefix\|string.defix\|string.hash\|string.convch\|string.lexcmp\|string.lexncmp\|string.lexwcmp\|string.matchpat\|string.soundex\|string.cntch\|string.xml\|string.html_encode\|string.html_decode\|math.abs\|math.ceil\|math.floor\|math.mod\|math.rand\|math.sqrt\|math.exp\|math.log\|math.log10\|math.pow\|math.pi\|math.sin\|math.cos\|math.tan\|math.asin\|math.acos\|math.atan\|math.atan2\|math.sinh\|math.cosh\|math.tanh\|math.asinh\|math.acosh\|math.atanh\|dir.load\|dir.create\|dir.delete\|dir.cwd\|dir.setcwd\|dir.files\|zip.extract\|zip.load\|zip.create\|zip.new\|zip.add\|zip.close\|date.picture\|date.number\|time.picture\|time.number\|regexp.match\|sock.passive\|sock.accept\|sock.close\|sock.connect\|sock.error\|sock.read\|sock.write\|mail.send\|mail.error\|thread.create\)\s*(\@="
 syn region gslFuncCall contained start="\<[a-z][a-zA-Z_\-0-9]*\s*(" end=")"
 
-syn match  gslFuncDef contained "\.\s*\(macro\|function\)\s\+\(global\s\+\.\s\+\)\?[a-zA-Z_\-0-9]\+\s*\(([^)]*)\)\?" contains=gslKeyWord,gslName
+syn match  gslFuncDef contained "\<\(macro\|function\)\s\+\(global\s\+\.\s\+\)\?[a-zA-Z_\-0-9]\+\s*\(([^)]*)\)\?" contains=gslKeyWord,gslName
 
 syn region gslReference start=/\$(/ end=/)/ contains=gslString,gslNumber,gslOperator,gslPredefIdent,gslBuiltInFunc
 
-syn match gslDirective "^\s*\..*" contains=gslInitialDot,gslNumber,gslString,gslOperator,gslPredefIdent,gslReference,gslKeyWord,gslRepeat,gslConditional,gslFuncDef,gslBuiltInFunc,gslFullLineComment,gslHashLineComment,gslMultilineComment
+syn cluster gslDirective contains=gslNumber,gslString,gslOperator,gslPredefIdent,gslReference,gslKeyWord,gslRepeat,gslConditional,gslFuncDef,gslBuiltInFunc,gslFullLineComment,gslHashLineComment,gslMultilineComment
+
+" Handle the different modes
+syn match gslTemplModeDirectives  contained "^\s*\..*" contains=gslInitialDot,@gslDirective
+syn match gslScriptModeDirectives contained "^[^>].*"  contains=@gslDirective
+
+syn region gslDefaultMode start="^."                    keepend end="^\s*\.template\>"    contains=gslTemplModeDirectives
+syn region gslTemplMode   start="^\s*\.template\s\+1\>" keepend end="^\s*\.endtemplate\>" contains=gslTemplModeDirectives
+syn region gslScriptMode  start="^\s*\.template\s\+0\>" keepend end="^\s*endtemplate\>"   contains=gslScriptModeDirectives
+
+" Synchronization
+syn sync clear
+syn sync match gslTemplateStart grouphere NONE "\<endtemplate\>"
 
 " Define the default highlighting.
 " For version 5.7 and earlier: only when not done already
